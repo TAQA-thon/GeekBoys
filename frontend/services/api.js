@@ -292,6 +292,10 @@ class ApiService {
     return await this.request('/anomalies/mongodb/time-slots/');
   }
 
+  async getSlotScheduledAnomalies(slotId) {
+    return await this.request(`/anomalies/mongodb/time-slots/${slotId}/anomalies/`);
+  }
+
   // System-specific anomalies
   async getAnomaliesBySystem(unitId, params = {}) {
     const queryString = new URLSearchParams(params).toString();
@@ -367,6 +371,7 @@ class ApiService {
       body: JSON.stringify(updateData),
     });
   }
+
 }
 
 // Create and export a singleton instance

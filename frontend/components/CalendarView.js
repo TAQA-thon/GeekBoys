@@ -485,6 +485,7 @@ export default function DynamicCalendar() {
     setLoadingAnomalies(true);
     try {
       const response = await apiService.getSlotScheduledAnomalies(slotId);
+      console.log ("slots = ", response);
       // FIX: Add proper null/undefined checks
       if (response && response.success && response.scheduled_anomaly_ids && Array.isArray(response.scheduled_anomaly_ids)) {
         // Fetch full anomaly data for each ID

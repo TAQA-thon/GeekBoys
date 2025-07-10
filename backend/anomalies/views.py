@@ -1201,10 +1201,12 @@ def report_summary_view(request):
 def report_trends_view(request):
     mongo = get_mongodb_service()
     date_field = "Date de détéction de l'anomalie"
-    start = request.query_params.get('start')
-    end = request.query_params.get('end')
-    status = request.query_params.get('status')
+    start = request.query_params.get('start', None)
+    end = request.query_params.get('end', None)
+    status = request.query_params.get('status', None)
     period = request.query_params.get('period', 'auto')  # 'auto', 'monthly', 'daily'
+
+    print (f"++++> Report trend : {start}, {end}, {date_field}, {status}, {period}")
 
     # 1. Build match filter
     match = {}
@@ -1212,9 +1214,13 @@ def report_trends_view(request):
         match['status'] = status
     if start and end:
         match[date_field] = {"$gte": start, "$lte": end}
+    
+    print (f"match = {match}")
 
     # 2. Fetch all matching docs
     docs = list(mongo.collection.find(match))
+
+    print (f"docs = {docs}")
     # 3. Parse dates and group
     date_counts = {}
     date_format = "%Y-%m-%d"

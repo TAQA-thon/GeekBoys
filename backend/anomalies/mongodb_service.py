@@ -59,8 +59,12 @@ class MongoDBService:
                 for key, value in anomaly.items():
                     if isinstance(value, str) and value.strip() == '':
                         anomaly[key] = None
+
+                print ("inserting data")
             
             # --- AI criticality integration ---
+            import time
+            index = 0
             for anomaly in anomalies_data:
                 fiab, dispo, proc = self.get_ai_criticality(anomaly)
                 if all(x is not None for x in [fiab, dispo, proc]):
@@ -70,11 +74,26 @@ class MongoDBService:
                     anomaly['criticite'] = fiab + dispo + proc
                     anomaly['criticality'] = fiab + dispo + proc
                 else:
-                    anomaly['Fiabilité Intégrité'] = 2
-                    anomaly['Disponibilté'] = 2
-                    anomaly['Process Safety'] = 2
-                    anomaly['criticite'] = 6
-                    anomaly['criticality'] = 6
+                    import time
+                    time.sleep (60)
+                    fiab, dispo, proc = self.get_ai_criticality(anomaly)
+                    if all(x is not None for x in [fiab, dispo, proc]):
+                        anomaly['Fiabilité Intégrité'] = fiab
+                        anomaly['Disponibilté'] = dispo
+                        anomaly['Process Safety'] = proc
+                        anomaly['criticite'] = fiab + dispo + proc
+                        anomaly['criticality'] = fiab + dispo + proc
+                    else:
+                        anomaly['Fiabilité Intégrité'] = 2
+                        anomaly['Disponibilté'] = 2
+                        anomaly['Process Safety'] = 2
+                        anomaly['criticite'] = 6
+                        anomaly['criticality'] = 6
+                # index += 1
+                # if index % 20 == 0:
+                #     print ("WAiting for processing data by the AI")
+                # time.sleep(0.5)
+
             
             # Insert data into MongoDB (taza)
             result = self.collection.insert_many(anomalies_data)

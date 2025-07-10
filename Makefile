@@ -16,3 +16,9 @@ frontend:
 
 mongodb:
 	docker run -d --name mongo -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=admin -p 27017:27017 mongo
+
+clean:
+	rm -rf frontend/node_modules
+	rm -rf venv
+	rm -rf backend/venv
+	rm -rf frontend/.next
