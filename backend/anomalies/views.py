@@ -1161,36 +1161,36 @@ def mongodb_time_slot_reschedule_view(request, slot_id):
 @permission_classes([IsAdminOrManager])
 def report_summary_view(request):
     try:
-    mongo = get_mongodb_service()
-    total = mongo.collection.count_documents({})
-    open_count = mongo.collection.count_documents({'status': 'open'})
-    resolved_count = mongo.collection.count_documents({'status': 'resolved'})
-    in_progress_count = mongo.collection.count_documents({'status': 'in_progress'})
-    critical_count = mongo.collection.count_documents({'criticality': {'$gt': 9}})
-    # Average resolution time (in days)
-    pipeline = [
-        {"$match": {"status": "resolved", "Date de détéction de l'anomalie": {"$exists": True}, "updated_at": {"$exists": True}}},
-        {"$project": {
-            "created": {"$toDate": "$Date de détéction de l'anomalie"},
-            "updated": {"$toDate": "$updated_at"}
-        }},
-        {"$project": {
-            "diff": {"$divide": [{"$subtract": ["$updated", "$created"]}, 1000 * 60 * 60 * 24]}
-        }},
-        {"$group": {"_id": None, "avg": {"$avg": "$diff"}}}
-    ]
-    avg_res = list(mongo.collection.aggregate(pipeline))
-    avg_days = round(avg_res[0]['avg'], 2) if avg_res else 0
-    result = {
-        'total_anomalies': total,
-        'open_anomalies': open_count,
-        'resolved_anomalies': resolved_count,
-        'critical_anomalies': critical_count,
-        'in_progress_anomalies': in_progress_count,
-        'avg_resolution_time': avg_days,
-    }
-    print('Report summary output:', result)
-    return Response(result)
+        mongo = get_mongodb_service()
+        total = mongo.collection.count_documents({})
+        open_count = mongo.collection.count_documents({'status': 'open'})
+        resolved_count = mongo.collection.count_documents({'status': 'resolved'})
+        in_progress_count = mongo.collection.count_documents({'status': 'in_progress'})
+        critical_count = mongo.collection.count_documents({'criticality': {'$gt': 9}})
+        # Average resolution time (in days)
+        pipeline = [
+            {"$match": {"status": "resolved", "Date de détéction de l'anomalie": {"$exists": True}, "updated_at": {"$exists": True}}},
+            {"$project": {
+                "created": {"$toDate": "$Date de détéction de l'anomalie"},
+                "updated": {"$toDate": "$updated_at"}
+            }},
+            {"$project": {
+                "diff": {"$divide": [{"$subtract": ["$updated", "$created"]}, 1000 * 60 * 60 * 24]}
+            }},
+            {"$group": {"_id": None, "avg": {"$avg": "$diff"}}}
+        ]
+        avg_res = list(mongo.collection.aggregate(pipeline))
+        avg_days = round(avg_res[0]['avg'], 2) if avg_res else 0
+        result = {
+            'total_anomalies': total,
+            'open_anomalies': open_count,
+            'resolved_anomalies': resolved_count,
+            'critical_anomalies': critical_count,
+            'in_progress_anomalies': in_progress_count,
+            'avg_resolution_time': avg_days,
+        }
+        print('Report summary output:', result)
+        return Response(result)
     except Exception as e:
         print(f'Error in report_summary_view: {str(e)}')
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -1289,15 +1289,15 @@ def report_trends_view(request):
 @permission_classes([IsAdminOrManager])
 def report_by_status_view(request):
     try:
-    mongo = get_mongodb_service()
-    pipeline = [
-        {"$group": {"_id": "$status", "count": {"$sum": 1}}},
-        {"$sort": {"_id": 1}}
-    ]
-    data = list(mongo.collection.aggregate(pipeline))
-    by_status = [{"status": d["_id"], "count": d["count"]} for d in data]
+        mongo = get_mongodb_service()
+        pipeline = [
+            {"$group": {"_id": "$status", "count": {"$sum": 1}}},
+            {"$sort": {"_id": 1}}
+        ]
+        data = list(mongo.collection.aggregate(pipeline))
+        by_status = [{"status": d["_id"], "count": d["count"]} for d in data]
         print('Report by status output:', by_status)
-    return Response(by_status)
+        return Response(by_status)
     except Exception as e:
         print(f'Error in report_by_status_view: {str(e)}')
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -1307,15 +1307,15 @@ def report_by_status_view(request):
 @permission_classes([IsAdminOrManager])
 def report_by_criticality_view(request):
     try:
-    mongo = get_mongodb_service()
-    pipeline = [
-        {"$group": {"_id": "$criticality", "count": {"$sum": 1}}},
-        {"$sort": {"_id": 1}}
-    ]
-    data = list(mongo.collection.aggregate(pipeline))
-    by_crit = [{"condition": str(d["_id"]), "count": d["count"]} for d in data]
+        mongo = get_mongodb_service()
+        pipeline = [
+            {"$group": {"_id": "$criticality", "count": {"$sum": 1}}},
+            {"$sort": {"_id": 1}}
+        ]
+        data = list(mongo.collection.aggregate(pipeline))
+        by_crit = [{"condition": str(d["_id"]), "count": d["count"]} for d in data]
         print('Report by criticality output:', by_crit)
-    return Response(by_crit)
+        return Response(by_crit)
     except Exception as e:
         print(f'Error in report_by_criticality_view: {str(e)}')
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -1325,44 +1325,44 @@ def report_by_criticality_view(request):
 @permission_classes([IsAdminOrManager])
 def report_by_section_view(request):
     try:
-    mongo = get_mongodb_service()
-    # Pipeline to group by section and calculate avg resolution time in MongoDB
-    pipeline = [
-        {"$match": {"status": "resolved", "Date de détéction de l'anomalie": {"$exists": True}, "updated_at": {"$exists": True}}},
-        {"$project": {
-            "section": "$Section propriétaire",
-            "created": {"$toDate": "$Date de détéction de l'anomalie"},
-            "updated": {"$toDate": "$updated_at"}
-        }},
-        {"$project": {
-            "section": 1,
-            "diff": {"$divide": [{"$subtract": ["$updated", "$created"]}, 1000 * 60 * 60 * 24]}
-        }},
-        {"$group": {
-            "_id": "$section",
-            "avg_resolution_time": {"$avg": "$diff"},
-            "resolved": {"$sum": 1}
-        }}
-    ]
-    avg_data = {d['_id']: d for d in mongo.collection.aggregate(pipeline)}
-    # Now get total anomalies per section
-    pipeline_total = [
-        {"$group": {"_id": "$Section propriétaire", "total": {"$sum": 1}}},
-        {"$sort": {"total": -1}}
-    ]
-    total_data = {d['_id']: d['total'] for d in mongo.collection.aggregate(pipeline_total)}
-    # Merge results
-    rows = []
-    for section, total in total_data.items():
-        avg_info = avg_data.get(section, {})
-        rows.append({
-            "section": section,
-            "total": total,
-            "resolved": avg_info.get('resolved', 0),
-            "avg_resolution_time": round(avg_info.get('avg_resolution_time', 0), 2)
-        })
-        print('Report by section output:', rows)
-    return Response(rows)
+        mongo = get_mongodb_service()
+        # Pipeline to group by section and calculate avg resolution time in MongoDB
+        pipeline = [
+            {"$match": {"status": "resolved", "Date de détéction de l'anomalie": {"$exists": True}, "updated_at": {"$exists": True}}},
+            {"$project": {
+                "section": "$Section propriétaire",
+                "created": {"$toDate": "$Date de détéction de l'anomalie"},
+                "updated": {"$toDate": "$updated_at"}
+            }},
+            {"$project": {
+                "section": 1,
+                "diff": {"$divide": [{"$subtract": ["$updated", "$created"]}, 1000 * 60 * 60 * 24]}
+            }},
+            {"$group": {
+                "_id": "$section",
+                "avg_resolution_time": {"$avg": "$diff"},
+                "resolved": {"$sum": 1}
+            }}
+        ]
+        avg_data = {d['_id']: d for d in mongo.collection.aggregate(pipeline)}
+        # Now get total anomalies per section
+        pipeline_total = [
+            {"$group": {"_id": "$Section propriétaire", "total": {"$sum": 1}}},
+            {"$sort": {"total": -1}}
+        ]
+        total_data = {d['_id']: d['total'] for d in mongo.collection.aggregate(pipeline_total)}
+        # Merge results
+        rows = []
+        for section, total in total_data.items():
+            avg_info = avg_data.get(section, {})
+            rows.append({
+                "section": section,
+                "total": total,
+                "resolved": avg_info.get('resolved', 0),
+                "avg_resolution_time": round(avg_info.get('avg_resolution_time', 0), 2)
+            })
+            print('Report by section output:', rows)
+        return Response(rows)
     except Exception as e:
         print(f'Error in report_by_section_view: {str(e)}')
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -1377,38 +1377,38 @@ def analytics_view(request):
     print('*** THIS IS THE ANALYTICS VIEW FUNCTION ***')
     print('*** IF YOU SEE THIS, THE FUNCTION IS BEING CALLED ***')
     try:
-    # Parse year, month, day from query params
-    year = request.GET.get('year')
-    month = request.GET.get('month')
-    day = request.GET.get('day')
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    period = request.GET.get('period', '1year')
+        # Parse year, month, day from query params
+        year = request.GET.get('year')
+        month = request.GET.get('month')
+        day = request.GET.get('day')
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        period = request.GET.get('period', '1year')
 
-    # If year/month/day are provided, build start_date and end_date
-    from datetime import datetime
-    if year and month and day:
-        # Single day
-        start_date = end_date = f"{year}-{int(month):02d}-{int(day):02d}"
-    elif year and month:
-        # Whole month
-        start_date = f"{year}-{int(month):02d}-01"
-        # Calculate last day of month
-        import calendar
-        last_day = calendar.monthrange(int(year), int(month))[1]
-        end_date = f"{year}-{int(month):02d}-{last_day:02d}"
-    elif year:
-        # Whole year
-        start_date = f"{year}-01-01"
-        end_date = f"{year}-12-31"
-    # If start_date and end_date are provided as query params, use them
-    # (already set above if present)
-        print(f'Analytics view params: year={year}, month={month}, day={day}, start_date={start_date}, end_date={end_date}, period={period}')
+        # If year/month/day are provided, build start_date and end_date
+        from datetime import datetime
+        if year and month and day:
+            # Single day
+            start_date = end_date = f"{year}-{int(month):02d}-{int(day):02d}"
+        elif year and month:
+            # Whole month
+            start_date = f"{year}-{int(month):02d}-01"
+            # Calculate last day of month
+            import calendar
+            last_day = calendar.monthrange(int(year), int(month))[1]
+            end_date = f"{year}-{int(month):02d}-{last_day:02d}"
+        elif year:
+            # Whole year
+            start_date = f"{year}-01-01"
+            end_date = f"{year}-12-31"
+        # If start_date and end_date are provided as query params, use them
+        # (already set above if present)
+            print(f'Analytics view params: year={year}, month={month}, day={day}, start_date={start_date}, end_date={end_date}, period={period}')
 
-        print('Getting MongoDB service...')
-    mongo = get_mongodb_service()
+            print('Getting MongoDB service...')
+        mongo = get_mongodb_service()
         print('MongoDB service obtained, calling get_analytics_data...')
-    data = mongo.get_analytics_data(period=period, start_date=start_date, end_date=end_date)
+        data = mongo.get_analytics_data(period=period, start_date=start_date, end_date=end_date)
         print('get_analytics_data returned:', data)
         print('Analytics view data:', data)
         print('Analytics view data keys:', list(data.keys()) if isinstance(data, dict) else 'Not a dict')
@@ -1422,7 +1422,7 @@ def analytics_view(request):
             for key, value in data.items():
                 print(f'Analytics {key}: {len(value) if isinstance(value, list) else value}')
 
-    return JsonResponse(data, safe=False)
+        return JsonResponse(data, safe=False)
     except Exception as e:
         print(f'Error in analytics_view: {str(e)}')
         return JsonResponse({'error': str(e)}, status=500)
@@ -1474,25 +1474,25 @@ def debug_data_view(request):
 @permission_classes([IsAdminOrManager])
 def earliest_anomaly_date_view(request):
     try:
-    mongo = get_mongodb_service()
-    doc = mongo.collection.find_one({}, sort=[('Date de détéction de l\'anomalie', 1)])
+        mongo = get_mongodb_service()
+        doc = mongo.collection.find_one({}, sort=[('Date de détéction de l\'anomalie', 1)])
         print("earliest_anomaly_date_view doc = ", doc)
-    earliest_date = None
-    if doc and doc.get('Date de détéction de l\'anomalie'):
-        from datetime import datetime
-        dt = doc['Date de détéction de l\'anomalie']
+        earliest_date = None
+        if doc and doc.get('Date de détéction de l\'anomalie'):
+            from datetime import datetime
+            dt = doc['Date de détéction de l\'anomalie']
             print("earliest_anomaly_date_view dt = ", dt)
-        if isinstance(dt, datetime):
-            earliest_date = dt.strftime('%Y-%m-%d')
+            if isinstance(dt, datetime):
+                earliest_date = dt.strftime('%Y-%m-%d')
                 print("earliest_anomaly_date_view earliest_date = ", earliest_date)
-        else:
-            # Try to parse string
-            try:
-                earliest_date = str(dt)[:10]
-            except Exception:
-                earliest_date = str(dt)
-        print("earliest_anomaly_date_view returning:", {"earliest_date": earliest_date})
-    return Response({"earliest_date": earliest_date})
+            else:
+                # Try to parse string
+                try:
+                    earliest_date = str(dt)[:10]
+                except Exception:
+                    earliest_date = str(dt)
+            print("earliest_anomaly_date_view returning:", {"earliest_date": earliest_date})
+        return Response({"earliest_date": earliest_date})
     except Exception as e:
         print(f'Error in earliest_anomaly_date_view: {str(e)}')
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

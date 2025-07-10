@@ -8,8 +8,6 @@ start:
 	$(MAKE) -j 3 backend frontend mongodb 
 
 backend:
-	python3 -m venv venv
-	venv/bin/pip install -r backend/requirements.txt
 	cd backend && venv/bin/python3 -m daphne -b 0.0.0.0 -p 8000 anomaly_scheduler.asgi:application
 
 frontend:

@@ -1946,7 +1946,7 @@ class MongoDBService:
                 if dispo is None:
                     dispo = scores.get('disponibilite')
                 proc = scores.get('process_safe')
-            return fiab, dispo, proc
+                return fiab, dispo, proc
             else:
                 logger.error(f"AI endpoint did not return predicted_scores: {data}")
                 return None, None, None
