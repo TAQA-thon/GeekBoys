@@ -1,0 +1,40 @@
+classDiagram
+    class Unit {
+        +id : UUID
+        +name : String
+    }
+
+    class System {
+        +id : UUID
+        +name : String
+        +unit_id : UUID
+    }
+
+    class Section {
+        +id : String
+        +name : String
+    }
+
+    class Equipment {
+        +id : UUID
+        +description : String
+        +system_id : UUID
+        +section_id : String
+    }
+
+    class Anomaly {
+        +id : UUID
+        +description : String
+        +date_detected : DateTime
+        +reliability_score : Int
+        +availability_score : Int
+        +safety_score : Int
+        +criticality_score : Int
+        +condition : String
+        +equipment_id : UUID
+    }
+
+    Unit "1" --> "0..*" System : contains
+    System "1" --> "0..*" Equipment : contains
+    Section "1" --> "0..*" Equipment : owns
+    Equipment "1" --> "0..*" Anomaly : triggers
